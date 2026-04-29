@@ -59,7 +59,9 @@ class PriceCache:
     def remove(self, ticker: str) -> None:
         """Remove a ticker from the cache (e.g., when removed from watchlist)."""
         with self._lock:
-            self._prices.pop(ticker, None)
+            removed = self._prices.pop(ticker, None)
+            if removed is not None:
+                self._version += 1
 
     @property
     def version(self) -> int:
