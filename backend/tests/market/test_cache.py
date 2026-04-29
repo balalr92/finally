@@ -49,6 +49,25 @@ class TestPriceCache:
         cache = PriceCache()
         cache.remove("AAPL")  # Should not raise
 
+    def test_remove_existing_increments_version(self):
+        """Removing an existing ticker should bump the cache version."""
+        cache = PriceCache()
+        cache.update("AAPL", 190.00)
+        version = cache.version
+
+        cache.remove("AAPL")
+
+        assert cache.version == version + 1
+
+    def test_remove_nonexistent_does_not_increment_version(self):
+        """Removing a missing ticker should not bump the cache version."""
+        cache = PriceCache()
+        version = cache.version
+
+        cache.remove("AAPL")
+
+        assert cache.version == version
+
     def test_get_all(self):
         """Test getting all prices."""
         cache = PriceCache()
