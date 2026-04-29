@@ -1,0 +1,8 @@
+{
+    "name": "independent-reviewer",
+    "description": "A plugin that carries out an independent review of all changes since the last commit and writes results to planning/REVIEW.md",
+    "version": "1.0.0",
+    "author": "Balaji Lakshmi Ramakrishnan",
+    "license": "MIT",
+    "main": "index.js"
+}

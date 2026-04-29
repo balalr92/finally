@@ -20,29 +20,35 @@ Single Docker container serving everything on port 8000:
 - **Frontend**: Next.js (static export) with TypeScript and Tailwind CSS
 - **Backend**: FastAPI (Python/uv) with SSE streaming
 - **Database**: SQLite with lazy initialization
-- **AI**: LiteLLM → OpenRouter (Cerebras inference) with structured outputs
-- **Market data**: Built-in GBM simulator (default) or Massive API (optional)
+- **AI**: OpenAI GPT-5.4 mini with structured outputs
+- **Market data**: Built-in GBM simulator (default) or Massive/Polygon.io API (optional)
 
 ## Quick Start
 
 ```bash
 # Clone and configure
 cp .env.example .env
-# Add your OPENROUTER_API_KEY to .env
+# Add your OPENAI_API_KEY to .env
 
-# Run with Docker
+# macOS/Linux
+./scripts/start_mac.sh
+
+# Windows
+./scripts/start_windows.ps1
+
+# Or run directly with Docker
 docker build -t finally .
 docker run -v finally-data:/app/db -p 8000:8000 --env-file .env finally
-
-# Open http://localhost:8000
 ```
+
+Open [http://localhost:8000](http://localhost:8000).
 
 ## Environment Variables
 
 | Variable | Required | Description |
 |---|---|---|
-| `OPENROUTER_API_KEY` | Yes | OpenRouter API key for AI chat |
-| `MASSIVE_API_KEY` | No | Massive (Polygon.io) key for real market data; omit to use simulator |
+| `OPENAI_API_KEY` | Yes | OpenAI API key for AI chat |
+| `MASSIVE_API_KEY` | No | Polygon.io key for real market data; omit to use the built-in simulator |
 | `LLM_MOCK` | No | Set `true` for deterministic mock LLM responses (testing) |
 
 ## Project Structure
@@ -52,9 +58,9 @@ finally/
 ├── frontend/    # Next.js static export
 ├── backend/     # FastAPI uv project
 ├── planning/    # Project documentation and agent contracts
+├── scripts/     # Start/stop helpers (Mac and Windows)
 ├── test/        # Playwright E2E tests
-├── db/          # SQLite volume mount (runtime)
-└── scripts/     # Start/stop helpers
+└── db/          # SQLite volume mount (runtime)
 ```
 
 ## License
