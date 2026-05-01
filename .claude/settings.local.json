@@ -10,7 +10,10 @@
       "Bash(git rm *)",
       "Bash(git commit -m ' *)",
       "Bash(git config *)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(gh pr *)",
+      "Bash(git pull *)",
+      "Bash(git stash *)"
     ]
   }
 }
