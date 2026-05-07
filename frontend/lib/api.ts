@@ -1,7 +1,6 @@
 import type {
   Portfolio,
   TradeRequest,
-  Trade,
   PortfolioSnapshot,
   WatchlistEntry,
   ChatMessage,
@@ -23,8 +22,8 @@ export function getPortfolio(): Promise<Portfolio> {
   return request<Portfolio>("/api/portfolio");
 }
 
-export function executeTrade(trade: TradeRequest): Promise<Trade> {
-  return request<Trade>("/api/portfolio/trade", {
+export function executeTrade(trade: TradeRequest): Promise<Portfolio> {
+  return request<Portfolio>("/api/portfolio/trade", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(trade),

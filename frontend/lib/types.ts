@@ -55,7 +55,6 @@ export interface Trade {
 
 /** A portfolio value snapshot (for the P&L chart) */
 export interface PortfolioSnapshot {
-  id: string;
   total_value: number;
   recorded_at: string;
 }

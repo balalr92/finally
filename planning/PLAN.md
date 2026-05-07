@@ -464,7 +464,7 @@ This section tracks implementation progress by the AI agent team. Updated after 
 ### Team Members
 - **database-engineer** — SQLite schema, initialization, repository
 - **backend-engineer** — FastAPI main app, portfolio/watchlist API endpoints (complete)
-- **frontend-engineer** — Next.js bootstrap (complete); working on Task #7 next
+- **frontend-engineer** — Tasks #3, #7, #8 complete; Task #9 (ChatPanel) next
 - **llm-engineer** — OpenAI chat endpoint (complete — Task #6 done)
 - **devops-engineer** — Docker, scripts (scripts done; Dockerfile unblocked, ready for Task #10)
 - **integration-tester** — Playwright E2E tests (waiting on Docker + frontend)
@@ -491,7 +491,7 @@ This section tracks implementation progress by the AI agent team. Updated after 
 | §10 Frontend | Next.js project bootstrap | **DONE** | `frontend/next.config.ts`, `app/layout.tsx`, `app/globals.css` (Tailwind v4 `@theme`), `app/page.tsx` (full terminal layout shell), `postcss.config.mjs`; build produces `out/` |
 | §10 Frontend | SSE hook + types + API lib | **DONE** | `frontend/lib/types.ts`, `frontend/lib/api.ts`, `frontend/lib/useSSE.ts` |
 | §10 Frontend | Header + WatchlistPanel + Sparkline | **DONE** | `frontend/components/Header.tsx`, `frontend/components/Sparkline.tsx`, `frontend/components/WatchlistPanel.tsx` |
-| §10 Frontend | PortfolioHeatmap + PnLChart + PositionsTable + TradeBar + MainChart | **NOT STARTED** | — |
+| §10 Frontend | PortfolioHeatmap + PnLChart + PositionsTable + TradeBar + MainChart | **DONE** | `frontend/components/PortfolioHeatmap.tsx`, `PnLChart.tsx`, `PositionsTable.tsx`, `TradeBar.tsx`, `MainChart.tsx` |
 | §10 Frontend | ChatPanel | **NOT STARTED** | — |
 | §11 Docker | `Dockerfile` (multi-stage) | **NOT STARTED** | — |
 | §11 Docker | `docker-compose.yml` | **NOT STARTED** | — |
@@ -608,7 +608,7 @@ Each numbered task below maps to the agent task list in `finally-team`. Tasks ar
 ---
 
 #### Task #8 — Frontend: portfolio views (heatmap, P&L chart, positions table, trade bar, main chart)
-**Owner**: frontend-engineer | **Status**: NOT STARTED
+**Owner**: frontend-engineer | **Status**: DONE
 **Blocked by**: Task #7
 
 - `frontend/components/PortfolioHeatmap.tsx` — treemap of positions sized by portfolio weight, colored by P&L %
@@ -666,17 +666,15 @@ Each numbered task below maps to the agent task list in `finally-team`. Tasks ar
 
 Resume in this priority order:
 
-1. **devops-engineer**: Task #10 — Dockerfile + docker-compose.yml (unblocked; static files copy to `/app/backend/static/` per `main.py` path resolution)
-2. **frontend-engineer**: Task #8 — PortfolioHeatmap, PnLChart, PositionsTable, TradeBar, MainChart (unblocked — Task #7 done)
-3. **frontend-engineer**: Task #9 — ChatPanel (blocked by #8; Task #6 now done)
-4. **integration-tester**: Task #11 — Playwright E2E tests (blocked by #9 and #10)
+1. **frontend-engineer**: Task #9 — ChatPanel (unblocked — Tasks #6 and #8 done)
+2. **devops-engineer**: Task #10 — Dockerfile + docker-compose.yml (unblocked)
+3. **integration-tester**: Task #11 — Playwright E2E tests (blocked by #9 and #10)
 
 ### Resume Instructions
 
-Tasks #3, #5, #6, and #7 are complete. Tasks #8 and #10 are unblocked and ready to start.
+Tasks #3, #5, #6, #7, and #8 are complete. Tasks #9 and #10 are unblocked and ready to start.
 
-- Task #8 (ready) → frontend-engineer
-- Task #9 (blocked by #8) → frontend-engineer
+- Task #9 (ready) → frontend-engineer
 - Task #10 (ready) → devops-engineer
 - Task #11 (blocked by #9 and #10) → integration-tester
 - Task #11 (blocked by #9 and #10) → integration-tester
