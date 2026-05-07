@@ -17,7 +17,7 @@ def get_db_path(request: Request) -> str:
 
 def get_db(db_path: str = Depends(get_db_path)) -> Generator[sqlite3.Connection, None, None]:
     """Yield a SQLite connection scoped to one request."""
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path, check_same_thread=False)
     try:
         yield conn
     finally:
