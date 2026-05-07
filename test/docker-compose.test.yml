@@ -1,0 +1,30 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: finally:latest
+    container_name: finally-test
+    ports:
+      - "8000:8000"
+    environment:
+      - LLM_MOCK=true
+      - OPENAI_API_KEY=mock-key-not-used
+      - DB_PATH=/app/db/finally.db
+    volumes:
+      - test-data:/app/db
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+volumes:
+  test-data:

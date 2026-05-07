@@ -467,7 +467,7 @@ This section tracks implementation progress by the AI agent team. Updated after 
 - **frontend-engineer** — Tasks #3, #7, #8, #9 complete (all frontend done)
 - **llm-engineer** — OpenAI chat endpoint (complete — Task #6 done)
 - **devops-engineer** — All Docker artifacts complete (Task #10 done)
-- **integration-tester** — Playwright E2E tests (waiting on Docker + frontend)
+- **integration-tester** — Playwright E2E tests complete (Task #11 done — 17/17 passing)
 
 ### Component Status
 
@@ -501,7 +501,7 @@ This section tracks implementation progress by the AI agent team. Updated after 
 | §12 Testing | Backend DB unit tests | **DONE** | `backend/tests/db/` |
 | §12 Testing | Backend market unit tests | **DONE** (pre-existing) | `backend/tests/market/` |
 | §12 Testing | Backend API unit tests (chat) | **DONE** | `backend/tests/api/test_chat.py` |
-| §12 Testing | E2E Playwright tests | **NOT STARTED** | — |
+| §12 Testing | E2E Playwright tests | **DONE** | `test/tests/*.spec.ts` |
 
 ### Task Definitions
 
@@ -648,7 +648,7 @@ Each numbered task below maps to the agent task list in `finally-team`. Tasks ar
 ---
 
 #### Task #11 — Playwright E2E tests
-**Owner**: integration-tester | **Status**: NOT STARTED
+**Owner**: integration-tester | **Status**: DONE
 **Blocked by**: Tasks #9, #10
 
 - `test/package.json` + `test/playwright.config.ts` — Playwright setup targeting `http://localhost:8000`
@@ -664,13 +664,9 @@ Each numbered task below maps to the agent task list in `finally-team`. Tasks ar
 
 ### What Remains
 
-Resume in this priority order:
+**All tasks are complete.** The full application — backend, frontend, Docker, and E2E tests — is built and passing.
 
-1. **integration-tester**: Task #11 — Playwright E2E tests (now unblocked)
+### Final Status
 
-### Resume Instructions
-
-Tasks #3, #5, #6, #7, #8, #9, and #10 are complete. The application is fully built and containerised. Only E2E tests remain.
-
-- Task #11 (ready) → integration-tester
+All 11 tasks complete. 17 Playwright E2E tests pass against a fresh Docker container with `LLM_MOCK=true`.
 - Task #11 (blocked by #9 and #10) → integration-tester
