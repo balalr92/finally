@@ -456,3 +456,231 @@ The container is designed to deploy to AWS App Runner, Render, or any container 
 - SSE resilience: disconnect and verify reconnection
 
 ---
+
+## 13. Agent Build Status (as of 2026-05-07)
+
+This section tracks implementation progress by the AI agent team. Updated after each work session.
+
+### Team Members
+- **database-engineer** — SQLite schema, initialization, repository
+- **backend-engineer** — FastAPI main app, portfolio/watchlist API endpoints (complete)
+- **frontend-engineer** — Next.js bootstrap (complete); working on Task #7 next
+- **llm-engineer** — OpenAI chat endpoint (unblocked, ready to start Task #6)
+- **devops-engineer** — Docker, scripts (scripts done; Dockerfile unblocked, ready for Task #10)
+- **integration-tester** — Playwright E2E tests (waiting on Docker + frontend)
+
+### Component Status
+
+| Section | Component | Status | Files Created |
+|---------|-----------|--------|---------------|
+| §7 Database | Schema (all 6 tables) | **DONE** | `backend/app/db/schema.py` |
+| §7 Database | DB init + seed (user + 10 tickers) | **DONE** | `backend/app/db/init_db.py` |
+| §7 Database | Repository CRUD layer | **DONE** | `backend/app/db/repository.py` |
+| §7 Database | DB unit tests (32 passing) | **DONE** | `backend/tests/db/test_init_db.py`, `test_repository.py` |
+| §6 Market Data | Simulator, cache, SSE stream, Massive client | **DONE** (pre-existing) | `backend/app/market/` |
+| §8 API — System | `GET /api/health` | **DONE** | `backend/app/main.py` |
+| §8 API — Market | `GET /api/stream/prices` (SSE) | **DONE** | `backend/app/main.py` + `market/stream.py` |
+| §8 API — Portfolio | `GET /api/portfolio` | **DONE** | `backend/app/api/portfolio.py` |
+| §8 API — Portfolio | `POST /api/portfolio/trade` | **DONE** | `backend/app/api/portfolio.py` |
+| §8 API — Portfolio | `GET /api/portfolio/history` | **DONE** | `backend/app/api/portfolio.py` |
+| §8 API — Watchlist | `GET /api/watchlist` | **DONE** | `backend/app/api/watchlist.py` |
+| §8 API — Watchlist | `POST /api/watchlist` | **DONE** | `backend/app/api/watchlist.py` |
+| §8 API — Watchlist | `DELETE /api/watchlist/{ticker}` | **DONE** | `backend/app/api/watchlist.py` |
+| §8 API — Chat | `POST /api/chat` | **NOT STARTED** | — |
+| §9 LLM Integration | OpenAI structured outputs + auto-execute | **NOT STARTED** | — |
+| §10 Frontend | Next.js project bootstrap | **DONE** | `frontend/next.config.ts`, `app/layout.tsx`, `app/globals.css` (Tailwind v4 `@theme`), `app/page.tsx` (full terminal layout shell), `postcss.config.mjs`; build produces `out/` |
+| §10 Frontend | SSE hook + types + API lib | **PARTIAL** | `frontend/lib/types.ts` + `frontend/lib/api.ts` done; `frontend/lib/useSSE.ts` still needed (Task #7) |
+| §10 Frontend | Header + WatchlistPanel + Sparkline | **NOT STARTED** | — |
+| §10 Frontend | PortfolioHeatmap + PnLChart + PositionsTable + TradeBar + MainChart | **NOT STARTED** | — |
+| §10 Frontend | ChatPanel | **NOT STARTED** | — |
+| §11 Docker | `Dockerfile` (multi-stage) | **NOT STARTED** | — |
+| §11 Docker | `docker-compose.yml` | **NOT STARTED** | — |
+| §11 Docker | Start/stop scripts | **DONE** | `scripts/start_windows.ps1`, `stop_windows.ps1`, `start_mac.sh`, `stop_mac.sh` |
+| §11 Docker | `.env.example` | **DONE** | `.env.example` |
+| §11 Docker | `db/.gitkeep` | **DONE** | `db/.gitkeep` |
+| §12 Testing | Backend DB unit tests | **DONE** | `backend/tests/db/` |
+| §12 Testing | Backend market unit tests | **DONE** (pre-existing) | `backend/tests/market/` |
+| §12 Testing | Backend API unit tests | **NOT STARTED** | — |
+| §12 Testing | E2E Playwright tests | **NOT STARTED** | — |
+
+### Task Definitions
+
+Each numbered task below maps to the agent task list in `finally-team`. Tasks are listed in dependency order.
+
+---
+
+#### Task #1 — SQLite schema, initialization, and seed data
+**Owner**: database-engineer | **Status**: DONE
+
+- `backend/app/db/schema.py` — `CREATE TABLE IF NOT EXISTS` for all 6 tables (§7)
+- `backend/app/db/init_db.py` — `init_db(db_path)`: creates tables, seeds default user ($10k cash), seeds 10 default watchlist tickers. Idempotent. Exposes `get_default_db_path()` reading `DB_PATH` env.
+- `backend/app/db/__init__.py` — re-exports `init_db`, `get_default_db_path`
+- `backend/tests/db/test_init_db.py` — 7 pytest tests (fresh init, idempotency, seed data)
+
+---
+
+#### Task #2 — FastAPI main application skeleton
+**Owner**: backend-engineer | **Status**: DONE
+
+- `backend/app/main.py` — FastAPI app with lifespan: calls `init_db`, starts market data background task via `create_market_data_source()`, stops on shutdown. Registers SSE router (`/api/stream/prices`). Mounts `backend/static/` as static files at `/`. `GET /api/health` → `{"status":"ok"}`.
+
+---
+
+#### Task #3 — Next.js frontend project bootstrap
+**Owner**: frontend-engineer | **Status**: DONE
+
+- `frontend/next.config.ts` — `output: 'export'`, `trailingSlash: true`, `images.unoptimized: true`
+- `frontend/postcss.config.mjs` — `@tailwindcss/postcss` plugin (Tailwind v4)
+- `frontend/app/globals.css` — Tailwind v4 `@import "tailwindcss"` + `@theme` with full dark color palette, flash-up/flash-down keyframe animations, scrollbar styling
+- `frontend/app/layout.tsx` — Geist fonts, metadata, `h-full` body
+- `frontend/app/page.tsx` — full terminal layout shell: fixed header (logo, total value, cash, connection dot), left watchlist sidebar, center column (chart + trade bar + heatmap/P&L/positions), right AI chat sidebar; all regions labeled with placeholder content
+- `frontend/lib/types.ts` — TypeScript interfaces: `PriceUpdate`, `WatchlistEntry`, `Position`, `Portfolio`, `TradeRequest`, `Trade`, `PortfolioSnapshot`, `ChatMessage`, `ChatActions`, `WatchlistChange`, `ChatRequest`
+- `frontend/lib/api.ts` — typed fetch wrappers for all 7 REST endpoints
+- `frontend/components/` — directory created
+- `npm run build` passes; `out/` static export confirmed
+
+---
+
+#### Task #4 — Database access layer (repository)
+**Owner**: database-engineer | **Status**: DONE
+
+- `backend/app/db/repository.py` — all CRUD functions taking `sqlite3.Connection` as first arg:
+  - `get_user_profile`, `update_cash_balance`
+  - `get_watchlist`, `add_to_watchlist`, `remove_from_watchlist`
+  - `get_positions`, `get_position`, `upsert_position`, `delete_position`
+  - `add_trade`, `get_trades`
+  - `add_portfolio_snapshot`, `get_portfolio_snapshots`
+  - `add_chat_message`, `get_chat_messages`
+- `backend/tests/db/test_repository.py` — 25 pytest tests
+
+---
+
+#### Task #5 — Portfolio and watchlist REST API endpoints
+**Owner**: backend-engineer | **Status**: DONE
+**Blocked by**: Tasks #2, #4
+
+- `backend/app/api/deps.py` — `get_db()` FastAPI dependency yielding `sqlite3.Connection`
+- `backend/app/api/portfolio.py` — `APIRouter(prefix="/api/portfolio")`:
+  - `GET /api/portfolio` — cash, positions with live prices/P&L from `PriceCache`, total value
+  - `POST /api/portfolio/trade` — body `{ticker, quantity, side}`. Validates cash (buys) and shares (sells). Updates cash, upserts position (weighted avg cost), logs trade, takes snapshot.
+  - `GET /api/portfolio/history` — snapshot list for P&L chart
+- `backend/app/api/watchlist.py` — `APIRouter(prefix="/api/watchlist")`:
+  - `GET /api/watchlist` — tickers with current prices from cache
+  - `POST /api/watchlist` — `{ticker}` adds to watchlist
+  - `DELETE /api/watchlist/{ticker}` — removes ticker
+- Portfolio snapshot background task (every 30 s) added to lifespan in `main.py`
+- Routers wired into `main.py`
+- `backend/tests/api/` — FastAPI TestClient unit tests
+
+---
+
+#### Task #6 — LLM chat endpoint (`POST /api/chat`)
+**Owner**: llm-engineer | **Status**: NOT STARTED
+**Blocked by**: ~~Task #5~~ — UNBLOCKED
+
+- `backend/app/api/chat.py` — `APIRouter(prefix="/api/chat")`:
+  - `POST /api/chat` body `{message: str}`
+  - Builds portfolio context + last 20 chat messages as LLM prompt
+  - Calls OpenAI (`gpt-4o-mini`) with structured output: `{message, trades?, watchlist_changes?}`
+  - Auto-executes trades (same validation as `/api/portfolio/trade`)
+  - Auto-applies watchlist changes
+  - Stores user + assistant messages in `chat_messages` table
+  - Returns `{message, trades_executed, watchlist_changes_applied, errors}`
+- **LLM mock mode**: `LLM_MOCK=true` env → skip OpenAI, return deterministic mock response
+- `openai` package added via `uv add openai`
+- Router wired into `main.py`
+- `backend/tests/api/test_chat.py` — tests using `LLM_MOCK=true`
+
+---
+
+#### Task #7 — Frontend: SSE hook, Header, WatchlistPanel, Sparkline
+**Owner**: frontend-engineer | **Status**: NOT STARTED
+**Blocked by**: ~~Task #3~~ — UNBLOCKED
+
+- `frontend/lib/types.ts` — DONE (created in Task #3)
+- `frontend/lib/api.ts` — DONE (created in Task #3)
+- `frontend/lib/useSSE.ts` — `EventSource` hook for `/api/stream/prices`; maintains `Map<ticker, PriceUpdate>`; accumulates sparkline history `Map<ticker, number[]>` (last 60 prices per ticker); exposes connection status (`connected | reconnecting | disconnected`)
+- `frontend/components/Header.tsx` — brand "FinAlly" (accent yellow), live total portfolio value, cash balance, connection status dot (green/yellow/red)
+- `frontend/components/Sparkline.tsx` — small SVG line chart from `number[]`
+- `frontend/components/WatchlistPanel.tsx` — ticker grid with price flash animation (CSS class applied for ~500ms on price change), sparkline per row, click to select ticker
+- `frontend/app/page.tsx` updated to show Header + WatchlistPanel
+- `npm run build` must pass
+
+---
+
+#### Task #8 — Frontend: portfolio views (heatmap, P&L chart, positions table, trade bar, main chart)
+**Owner**: frontend-engineer | **Status**: NOT STARTED
+**Blocked by**: Task #7
+
+- `frontend/components/PortfolioHeatmap.tsx` — treemap of positions sized by portfolio weight, colored by P&L %
+- `frontend/components/PnLChart.tsx` — portfolio value over time from `/api/portfolio/history` (lightweight-charts or recharts, dark theme)
+- `frontend/components/PositionsTable.tsx` — positions table with live price updates; P&L column colored green/red
+- `frontend/components/TradeBar.tsx` — ticker + qty inputs; Buy (blue `#209dd7`) + Sell (purple `#753991`) buttons; calls `POST /api/portfolio/trade`; shows inline error on failure
+- `frontend/components/MainChart.tsx` — larger price chart for selected ticker using accumulated SSE history
+- Full trading terminal layout in `app/page.tsx`: header top, watchlist left panel (~280 px), main chart center-top, heatmap center-bottom, positions + trade bar bottom, chat sidebar right
+- `npm run build` must pass
+
+---
+
+#### Task #9 — Frontend: AI chat panel
+**Owner**: frontend-engineer | **Status**: NOT STARTED
+**Blocked by**: Tasks #6, #8
+
+- `frontend/components/ChatPanel.tsx` — collapsible right sidebar:
+  - Scrolling message history (user right-aligned, assistant left-aligned)
+  - Loading spinner while awaiting LLM response
+  - Trade execution + watchlist change confirmation cards inline
+  - Text input + Send button (purple `#753991`)
+  - Calls `POST /api/chat`; refreshes portfolio data after AI executes trades
+- Chat toggle button in Header
+- `npm run build` must pass
+
+---
+
+#### Task #10 — Dockerfile, docker-compose, and deployment artifacts
+**Owner**: devops-engineer | **Status**: NOT STARTED (scripts already done)
+**Blocked by**: ~~Tasks #3, #5~~ — UNBLOCKED
+
+- `Dockerfile` — multi-stage: Stage 1 Node 20 slim builds `frontend/out/`; Stage 2 Python 3.12 slim installs uv, runs `uv sync --no-dev`, copies frontend export to `/app/backend/static/` (matches `main.py` path resolution), exposes 8000, CMD `uv run uvicorn app.main:app --host 0.0.0.0 --port 8000`
+- `docker-compose.yml` — single service, port 8000, volume `finally-data:/app/db`, `env_file: .env`
+- **Already done**: `scripts/start_windows.ps1`, `scripts/stop_windows.ps1`, `scripts/start_mac.sh`, `scripts/stop_mac.sh`, `.env.example`, `db/.gitkeep`
+- Validate with `docker build .`
+
+---
+
+#### Task #11 — Playwright E2E tests
+**Owner**: integration-tester | **Status**: NOT STARTED
+**Blocked by**: Tasks #9, #10
+
+- `test/package.json` + `test/playwright.config.ts` — Playwright setup targeting `http://localhost:8000`
+- `test/docker-compose.test.yml` — spins up app with `LLM_MOCK=true`, health check on `/api/health`
+- `test/tests/smoke.spec.ts` — 10 tickers visible, $10k cash in header, prices changing within 5 s, green connection dot
+- `test/tests/watchlist.spec.ts` — add ticker (PYPL appears), remove ticker (disappears)
+- `test/tests/trading.spec.ts` — buy 10 AAPL (cash decreases, position appears), sell 5 AAPL (quantity updates)
+- `test/tests/chat.spec.ts` — send message, response appears within 10 s, loading indicator shown then hidden
+- `test/run_tests.ps1` — starts `docker-compose.test.yml`, waits for health, runs Playwright, tears down, exits with test exit code
+- Run tests and report results; any failures fed back to responsible engineer
+
+---
+
+### What Remains
+
+Resume in this priority order:
+
+1. **frontend-engineer**: Task #7 — `useSSE.ts` hook, Header, WatchlistPanel, Sparkline components (lib/types.ts and lib/api.ts already done)
+2. **llm-engineer**: Task #6 — `POST /api/chat` with OpenAI structured outputs + LLM mock mode (unblocked)
+3. **devops-engineer**: Task #10 — Dockerfile + docker-compose.yml (unblocked; static files copy to `/app/backend/static/` per `main.py` path resolution)
+4. **frontend-engineer**: Task #8 — PortfolioHeatmap, PnLChart, PositionsTable, TradeBar, MainChart (blocked by #7)
+5. **frontend-engineer**: Task #9 — ChatPanel (blocked by #8 and #6)
+6. **integration-tester**: Task #11 — Playwright E2E tests (blocked by #9 and #10)
+
+### Resume Instructions
+
+Tasks #3 and #5 are complete. Tasks #6, #7, and #10 are unblocked and ready to start.
+
+- Task #6 (ready) → llm-engineer
+- Task #7 (ready) → frontend-engineer
+- Task #8 (blocked by #7) → frontend-engineer
+- Task #9 (blocked by #8 and #6) → frontend-engineer
+- Task #10 (ready) → devops-engineer
+- Task #11 (blocked by #9 and #10) → integration-tester
