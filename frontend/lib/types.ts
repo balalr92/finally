@@ -1,20 +1,22 @@
-/** Price update from SSE stream */
+/** Price update from SSE stream — matches PriceUpdate.to_dict() */
 export interface PriceUpdate {
   ticker: string;
   price: number;
-  prev_price: number;
+  previous_price: number;
   timestamp: string;
-  direction: "up" | "down" | "unchanged";
+  change: number;
+  change_percent: number;
+  direction: "up" | "down" | "flat";
 }
 
-/** Watchlist entry with latest price data */
+/** Watchlist entry with latest price data — matches GET /api/watchlist response */
 export interface WatchlistEntry {
-  id: string;
   ticker: string;
   price: number | null;
-  prev_price: number | null;
+  previous_price: number | null;
+  change: number | null;
+  change_percent: number | null;
   direction: "up" | "down" | "unchanged" | null;
-  added_at: string;
 }
 
 /** A single open position */

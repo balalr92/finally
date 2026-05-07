@@ -1,34 +1,33 @@
-"use client";
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useSSE } from '../lib/useSSE';
+import { getPortfolio, getWatchlist } from '../lib/api';
+import type { WatchlistEntry } from '../lib/types';
+import Header from '../components/Header';
+import WatchlistPanel from '../components/WatchlistPanel';
 
 export default function Home() {
+  const { prices, sparklines, status } = useSSE();
+  const [totalValue, setTotalValue] = useState<number | null>(null);
+  const [cash, setCash] = useState<number | null>(null);
+  const [watchlist, setWatchlist] = useState<WatchlistEntry[]>([]);
+  const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
+
+  useEffect(() => {
+    getPortfolio().then((p) => {
+      setTotalValue(p.total_value);
+      setCash(p.cash_balance);
+    });
+    getWatchlist().then((w) => {
+      setWatchlist(w);
+      if (w.length > 0) setSelectedTicker(w[0].ticker);
+    });
+  }, []);
+
   return (
     <div className="flex flex-col h-screen bg-bg-base text-text-primary overflow-hidden">
-      {/* Header */}
-      <header className="flex items-center justify-between px-4 py-2 border-b border-border-muted bg-bg-elevated shrink-0">
-        <div className="flex items-center gap-3">
-          <span className="text-accent-yellow font-bold text-lg tracking-tight font-mono">
-            FinAlly
-          </span>
-          <span className="text-text-muted text-xs">AI Trading Workstation</span>
-        </div>
-        <div className="flex items-center gap-6">
-          {/* Portfolio total — placeholder */}
-          <div className="text-right">
-            <div className="text-xs text-text-muted uppercase tracking-wider">Total Value</div>
-            <div className="text-accent-yellow font-mono font-semibold">$10,000.00</div>
-          </div>
-          {/* Cash balance — placeholder */}
-          <div className="text-right">
-            <div className="text-xs text-text-muted uppercase tracking-wider">Cash</div>
-            <div className="text-text-primary font-mono">$10,000.00</div>
-          </div>
-          {/* Connection status dot */}
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-up" title="Connected" />
-            <span className="text-xs text-text-muted">Live</span>
-          </div>
-        </div>
-      </header>
+      <Header totalValue={totalValue} cash={cash} connectionStatus={status} />
 
       {/* Main content: three-column layout */}
       <div className="flex flex-1 min-h-0 overflow-hidden">
@@ -37,9 +36,14 @@ export default function Home() {
           <div className="px-3 py-2 border-b border-border-subtle text-xs font-semibold text-text-muted uppercase tracking-wider">
             Watchlist
           </div>
-          <div className="flex-1 overflow-y-auto p-3 text-text-muted text-xs">
-            {/* WatchlistPanel component goes here */}
-            Watchlist panel
+          <div className="flex-1 overflow-y-auto p-2">
+            <WatchlistPanel
+              watchlist={watchlist}
+              prices={prices}
+              sparklines={sparklines}
+              selectedTicker={selectedTicker}
+              onSelectTicker={setSelectedTicker}
+            />
           </div>
         </aside>
 
@@ -80,7 +84,7 @@ export default function Home() {
           </div>
 
           {/* Bottom row: heatmap + P&L chart + positions table */}
-          <div className="flex min-h-0 overflow-hidden" style={{ height: "260px" }}>
+          <div className="flex min-h-0 overflow-hidden" style={{ height: '260px' }}>
             {/* Portfolio heatmap */}
             <div className="flex flex-col w-56 shrink-0 border-r border-border-muted bg-bg-panel p-2">
               <div className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">
