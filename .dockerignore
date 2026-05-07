@@ -1,0 +1,42 @@
+# Python virtual environment (rebuilt inside the container)
+backend/.venv/
+
+# Python cache
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+
+# Test artifacts
+backend/tests/
+backend/.pytest_cache/
+backend/.ruff_cache/
+backend/htmlcov/
+backend/.coverage
+
+# Node modules (reinstalled inside the container)
+frontend/node_modules/
+
+# Next.js build outputs (rebuilt inside the container)
+frontend/.next/
+frontend/out/
+
+# Version control
+.git/
+.gitignore
+
+# Planning docs (not needed in image)
+planning/
+
+# E2E test infrastructure
+test/
+
+# Local runtime database (populated at runtime via volume)
+db/finally.db
+
+# Editor configs
+.vscode/
+.idea/
+.claude/
+
+# Local environment file (injected at runtime, never baked in)
+.env
