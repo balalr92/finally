@@ -84,3 +84,19 @@ export interface WatchlistChange {
 export interface ChatRequest {
   message: string;
 }
+
+/** Response from POST /api/chat */
+export interface ChatApiResponse {
+  message: string;
+  trades_executed: Array<{
+    ticker: string;
+    side: 'buy' | 'sell';
+    quantity: number;
+    price: number;
+  }>;
+  watchlist_changes_applied: Array<{
+    ticker: string;
+    action: 'add' | 'remove';
+  }>;
+  errors: string[];
+}
