@@ -3,7 +3,7 @@ import type {
   TradeRequest,
   PortfolioSnapshot,
   WatchlistEntry,
-  ChatMessage,
+  ChatApiResponse,
   ChatRequest,
 } from "./types";
 
@@ -56,9 +56,9 @@ export function removeFromWatchlist(ticker: string): Promise<void> {
 
 // Chat
 
-export function sendChatMessage(message: string): Promise<ChatMessage> {
+export function sendChatMessage(message: string): Promise<ChatApiResponse> {
   const body: ChatRequest = { message };
-  return request<ChatMessage>("/api/chat", {
+  return request<ChatApiResponse>("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),

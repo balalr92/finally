@@ -6,6 +6,8 @@ interface HeaderProps {
   totalValue: number | null;
   cash: number | null;
   connectionStatus: ConnectionStatus;
+  chatOpen: boolean;
+  onToggleChat: () => void;
 }
 
 function fmt(value: number | null): string {
@@ -25,7 +27,7 @@ const statusLabel: Record<ConnectionStatus, string> = {
   disconnected: 'Disconnected',
 };
 
-export default function Header({ totalValue, cash, connectionStatus }: HeaderProps) {
+export default function Header({ totalValue, cash, connectionStatus, chatOpen, onToggleChat }: HeaderProps) {
   return (
     <header className="flex items-center justify-between px-4 py-2 border-b border-border-muted bg-bg-elevated shrink-0">
       <div className="flex items-center gap-3">
@@ -44,9 +46,22 @@ export default function Header({ totalValue, cash, connectionStatus }: HeaderPro
           <div className="text-text-primary font-mono">{fmt(cash)}</div>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className={`w-2 h-2 rounded-full ${statusDot[connectionStatus]}`} title={statusLabel[connectionStatus]} />
+          <span
+            className={`w-2 h-2 rounded-full ${statusDot[connectionStatus]}`}
+            title={statusLabel[connectionStatus]}
+          />
           <span className="text-xs text-text-muted">{statusLabel[connectionStatus]}</span>
         </div>
+        <button
+          onClick={onToggleChat}
+          className={`px-2.5 py-1 text-xs font-semibold rounded border transition-colors ${
+            chatOpen
+              ? 'border-accent-purple text-accent-purple bg-accent-purple/10'
+              : 'border-border-muted text-text-muted hover:border-accent-purple hover:text-accent-purple'
+          }`}
+        >
+          AI Chat
+        </button>
       </div>
     </header>
   );
