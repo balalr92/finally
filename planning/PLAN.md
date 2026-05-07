@@ -465,7 +465,7 @@ This section tracks implementation progress by the AI agent team. Updated after 
 - **database-engineer** — SQLite schema, initialization, repository
 - **backend-engineer** — FastAPI main app, portfolio/watchlist API endpoints (complete)
 - **frontend-engineer** — Next.js bootstrap (complete); working on Task #7 next
-- **llm-engineer** — OpenAI chat endpoint (unblocked, ready to start Task #6)
+- **llm-engineer** — OpenAI chat endpoint (complete — Task #6 done)
 - **devops-engineer** — Docker, scripts (scripts done; Dockerfile unblocked, ready for Task #10)
 - **integration-tester** — Playwright E2E tests (waiting on Docker + frontend)
 
@@ -486,8 +486,8 @@ This section tracks implementation progress by the AI agent team. Updated after 
 | §8 API — Watchlist | `GET /api/watchlist` | **DONE** | `backend/app/api/watchlist.py` |
 | §8 API — Watchlist | `POST /api/watchlist` | **DONE** | `backend/app/api/watchlist.py` |
 | §8 API — Watchlist | `DELETE /api/watchlist/{ticker}` | **DONE** | `backend/app/api/watchlist.py` |
-| §8 API — Chat | `POST /api/chat` | **NOT STARTED** | — |
-| §9 LLM Integration | OpenAI structured outputs + auto-execute | **NOT STARTED** | — |
+| §8 API — Chat | `POST /api/chat` | **DONE** | `backend/app/api/chat.py` |
+| §9 LLM Integration | OpenAI structured outputs + auto-execute | **DONE** | `backend/app/api/chat.py` |
 | §10 Frontend | Next.js project bootstrap | **DONE** | `frontend/next.config.ts`, `app/layout.tsx`, `app/globals.css` (Tailwind v4 `@theme`), `app/page.tsx` (full terminal layout shell), `postcss.config.mjs`; build produces `out/` |
 | §10 Frontend | SSE hook + types + API lib | **DONE** | `frontend/lib/types.ts`, `frontend/lib/api.ts`, `frontend/lib/useSSE.ts` |
 | §10 Frontend | Header + WatchlistPanel + Sparkline | **DONE** | `frontend/components/Header.tsx`, `frontend/components/Sparkline.tsx`, `frontend/components/WatchlistPanel.tsx` |
@@ -500,7 +500,7 @@ This section tracks implementation progress by the AI agent team. Updated after 
 | §11 Docker | `db/.gitkeep` | **DONE** | `db/.gitkeep` |
 | §12 Testing | Backend DB unit tests | **DONE** | `backend/tests/db/` |
 | §12 Testing | Backend market unit tests | **DONE** (pre-existing) | `backend/tests/market/` |
-| §12 Testing | Backend API unit tests | **NOT STARTED** | — |
+| §12 Testing | Backend API unit tests (chat) | **DONE** | `backend/tests/api/test_chat.py` |
 | §12 Testing | E2E Playwright tests | **NOT STARTED** | — |
 
 ### Task Definitions
@@ -575,7 +575,7 @@ Each numbered task below maps to the agent task list in `finally-team`. Tasks ar
 ---
 
 #### Task #6 — LLM chat endpoint (`POST /api/chat`)
-**Owner**: llm-engineer | **Status**: NOT STARTED
+**Owner**: llm-engineer | **Status**: DONE
 **Blocked by**: ~~Task #5~~ — UNBLOCKED
 
 - `backend/app/api/chat.py` — `APIRouter(prefix="/api/chat")`:
@@ -666,18 +666,17 @@ Each numbered task below maps to the agent task list in `finally-team`. Tasks ar
 
 Resume in this priority order:
 
-1. **llm-engineer**: Task #6 — `POST /api/chat` with OpenAI structured outputs + LLM mock mode (unblocked)
-2. **devops-engineer**: Task #10 — Dockerfile + docker-compose.yml (unblocked; static files copy to `/app/backend/static/` per `main.py` path resolution)
-3. **frontend-engineer**: Task #8 — PortfolioHeatmap, PnLChart, PositionsTable, TradeBar, MainChart (unblocked — Task #7 done)
-4. **frontend-engineer**: Task #9 — ChatPanel (blocked by #8 and #6)
-5. **integration-tester**: Task #11 — Playwright E2E tests (blocked by #9 and #10)
+1. **devops-engineer**: Task #10 — Dockerfile + docker-compose.yml (unblocked; static files copy to `/app/backend/static/` per `main.py` path resolution)
+2. **frontend-engineer**: Task #8 — PortfolioHeatmap, PnLChart, PositionsTable, TradeBar, MainChart (unblocked — Task #7 done)
+3. **frontend-engineer**: Task #9 — ChatPanel (blocked by #8; Task #6 now done)
+4. **integration-tester**: Task #11 — Playwright E2E tests (blocked by #9 and #10)
 
 ### Resume Instructions
 
-Tasks #3, #5, and #7 are complete. Tasks #6, #8, and #10 are unblocked and ready to start.
+Tasks #3, #5, #6, and #7 are complete. Tasks #8 and #10 are unblocked and ready to start.
 
-- Task #6 (ready) → llm-engineer
 - Task #8 (ready) → frontend-engineer
-- Task #9 (blocked by #8 and #6) → frontend-engineer
+- Task #9 (blocked by #8) → frontend-engineer
 - Task #10 (ready) → devops-engineer
+- Task #11 (blocked by #9 and #10) → integration-tester
 - Task #11 (blocked by #9 and #10) → integration-tester

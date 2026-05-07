@@ -16,6 +16,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from app.api.chat import router as chat_router
 from app.api.portfolio import _build_portfolio
 from app.api.portfolio import router as portfolio_router
 from app.api.watchlist import router as watchlist_router
@@ -91,6 +92,7 @@ def create_app() -> FastAPI:
     app.include_router(create_stream_router(price_cache))
     app.include_router(portfolio_router)
     app.include_router(watchlist_router)
+    app.include_router(chat_router)
 
     @app.get("/api/health")
     async def health() -> dict[str, str]:
