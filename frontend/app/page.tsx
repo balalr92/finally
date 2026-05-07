@@ -2,28 +2,44 @@
 
 import { useEffect, useState } from 'react';
 import { useSSE } from '../lib/useSSE';
-import { getPortfolio, getWatchlist } from '../lib/api';
-import type { WatchlistEntry } from '../lib/types';
+import { getPortfolio, getWatchlist, getPortfolioHistory } from '../lib/api';
+import type { WatchlistEntry, Position, PortfolioSnapshot, Portfolio } from '../lib/types';
 import Header from '../components/Header';
 import WatchlistPanel from '../components/WatchlistPanel';
+import MainChart from '../components/MainChart';
+import PnLChart from '../components/PnLChart';
+import PortfolioHeatmap from '../components/PortfolioHeatmap';
+import PositionsTable from '../components/PositionsTable';
+import TradeBar from '../components/TradeBar';
 
 export default function Home() {
   const { prices, sparklines, status } = useSSE();
   const [totalValue, setTotalValue] = useState<number | null>(null);
   const [cash, setCash] = useState<number | null>(null);
+  const [positions, setPositions] = useState<Position[]>([]);
   const [watchlist, setWatchlist] = useState<WatchlistEntry[]>([]);
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
+  const [snapshots, setSnapshots] = useState<PortfolioSnapshot[]>([]);
+
+  function applyPortfolio(p: Portfolio) {
+    setTotalValue(p.total_value);
+    setCash(p.cash_balance);
+    setPositions(p.positions);
+  }
 
   useEffect(() => {
-    getPortfolio().then((p) => {
-      setTotalValue(p.total_value);
-      setCash(p.cash_balance);
-    });
+    getPortfolio().then(applyPortfolio);
+    getPortfolioHistory().then(setSnapshots);
     getWatchlist().then((w) => {
       setWatchlist(w);
       if (w.length > 0) setSelectedTicker(w[0].ticker);
     });
   }, []);
+
+  function handleTradeComplete(portfolio: Portfolio) {
+    applyPortfolio(portfolio);
+    getPortfolioHistory().then(setSnapshots);
+  }
 
   return (
     <div className="flex flex-col h-screen bg-bg-base text-text-primary overflow-hidden">
@@ -47,53 +63,30 @@ export default function Home() {
           </div>
         </aside>
 
-        {/* Center column: Main chart + Trade bar */}
+        {/* Center column */}
         <main className="flex flex-col flex-1 min-w-0 overflow-hidden">
-          {/* Main chart area */}
+          {/* Main chart */}
           <div className="flex-1 min-h-0 bg-bg-base border-b border-border-muted p-3 flex flex-col">
             <div className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
-              Chart
+              {selectedTicker ? `${selectedTicker} — Price` : 'Chart'}
             </div>
-            <div className="flex-1 flex items-center justify-center text-text-muted text-xs border border-border-subtle rounded">
-              {/* MainChart component goes here */}
-              Select a ticker to view chart
-            </div>
+            <MainChart
+              ticker={selectedTicker}
+              data={selectedTicker ? (sparklines.get(selectedTicker) ?? []) : []}
+            />
           </div>
 
           {/* Trade bar */}
-          <div className="shrink-0 px-4 py-2 bg-bg-elevated border-b border-border-muted flex items-center gap-4">
-            <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-              Trade
-            </span>
-            <input
-              readOnly
-              placeholder="Ticker"
-              className="w-20 px-2 py-1 text-xs bg-bg-panel border border-border-muted rounded text-text-primary placeholder:text-text-muted font-mono"
-            />
-            <input
-              readOnly
-              placeholder="Quantity"
-              className="w-24 px-2 py-1 text-xs bg-bg-panel border border-border-muted rounded text-text-primary placeholder:text-text-muted font-mono"
-            />
-            <button className="px-3 py-1 text-xs font-semibold bg-up text-white rounded">
-              Buy
-            </button>
-            <button className="px-3 py-1 text-xs font-semibold bg-down text-white rounded">
-              Sell
-            </button>
-          </div>
+          <TradeBar selectedTicker={selectedTicker} onTradeComplete={handleTradeComplete} />
 
           {/* Bottom row: heatmap + P&L chart + positions table */}
           <div className="flex min-h-0 overflow-hidden" style={{ height: '260px' }}>
             {/* Portfolio heatmap */}
-            <div className="flex flex-col w-56 shrink-0 border-r border-border-muted bg-bg-panel p-2">
+            <div className="flex flex-col w-52 shrink-0 border-r border-border-muted bg-bg-panel p-2">
               <div className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">
                 Holdings
               </div>
-              <div className="flex-1 flex items-center justify-center text-text-muted text-xs border border-border-subtle rounded">
-                {/* PortfolioHeatmap goes here */}
-                Heatmap
-              </div>
+              <PortfolioHeatmap positions={positions} prices={prices} />
             </div>
 
             {/* P&L chart */}
@@ -101,10 +94,7 @@ export default function Home() {
               <div className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">
                 Portfolio P&amp;L
               </div>
-              <div className="flex-1 flex items-center justify-center text-text-muted text-xs border border-border-subtle rounded">
-                {/* PnLChart goes here */}
-                P&amp;L chart
-              </div>
+              <PnLChart snapshots={snapshots} />
             </div>
 
             {/* Positions table */}
@@ -112,15 +102,14 @@ export default function Home() {
               <div className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">
                 Positions
               </div>
-              <div className="flex-1 overflow-y-auto text-text-muted text-xs border border-border-subtle rounded flex items-center justify-center">
-                {/* PositionsTable goes here */}
-                Positions table
+              <div className="flex-1 overflow-y-auto">
+                <PositionsTable positions={positions} prices={prices} />
               </div>
             </div>
           </div>
         </main>
 
-        {/* Right column: AI Chat panel */}
+        {/* Right column: AI chat sidebar (placeholder — implemented in Task #9) */}
         <aside className="w-80 shrink-0 flex flex-col border-l border-border-muted bg-bg-panel overflow-hidden">
           <div className="px-3 py-2 border-b border-border-subtle flex items-center justify-between">
             <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
@@ -128,12 +117,9 @@ export default function Home() {
             </span>
             <span className="text-accent-yellow text-xs font-mono">FinAlly</span>
           </div>
-          {/* Chat history */}
           <div className="flex-1 overflow-y-auto p-3 space-y-2 text-text-muted text-xs">
-            {/* ChatPanel message list goes here */}
             Ask me anything about your portfolio…
           </div>
-          {/* Chat input */}
           <div className="shrink-0 p-3 border-t border-border-subtle flex gap-2">
             <input
               readOnly
