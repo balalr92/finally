@@ -489,8 +489,8 @@ This section tracks implementation progress by the AI agent team. Updated after 
 | §8 API — Chat | `POST /api/chat` | **NOT STARTED** | — |
 | §9 LLM Integration | OpenAI structured outputs + auto-execute | **NOT STARTED** | — |
 | §10 Frontend | Next.js project bootstrap | **DONE** | `frontend/next.config.ts`, `app/layout.tsx`, `app/globals.css` (Tailwind v4 `@theme`), `app/page.tsx` (full terminal layout shell), `postcss.config.mjs`; build produces `out/` |
-| §10 Frontend | SSE hook + types + API lib | **PARTIAL** | `frontend/lib/types.ts` + `frontend/lib/api.ts` done; `frontend/lib/useSSE.ts` still needed (Task #7) |
-| §10 Frontend | Header + WatchlistPanel + Sparkline | **NOT STARTED** | — |
+| §10 Frontend | SSE hook + types + API lib | **DONE** | `frontend/lib/types.ts`, `frontend/lib/api.ts`, `frontend/lib/useSSE.ts` |
+| §10 Frontend | Header + WatchlistPanel + Sparkline | **DONE** | `frontend/components/Header.tsx`, `frontend/components/Sparkline.tsx`, `frontend/components/WatchlistPanel.tsx` |
 | §10 Frontend | PortfolioHeatmap + PnLChart + PositionsTable + TradeBar + MainChart | **NOT STARTED** | — |
 | §10 Frontend | ChatPanel | **NOT STARTED** | — |
 | §11 Docker | `Dockerfile` (multi-stage) | **NOT STARTED** | — |
@@ -594,12 +594,11 @@ Each numbered task below maps to the agent task list in `finally-team`. Tasks ar
 ---
 
 #### Task #7 — Frontend: SSE hook, Header, WatchlistPanel, Sparkline
-**Owner**: frontend-engineer | **Status**: NOT STARTED
-**Blocked by**: ~~Task #3~~ — UNBLOCKED
+**Owner**: frontend-engineer | **Status**: DONE
 
-- `frontend/lib/types.ts` — DONE (created in Task #3)
-- `frontend/lib/api.ts` — DONE (created in Task #3)
-- `frontend/lib/useSSE.ts` — `EventSource` hook for `/api/stream/prices`; maintains `Map<ticker, PriceUpdate>`; accumulates sparkline history `Map<ticker, number[]>` (last 60 prices per ticker); exposes connection status (`connected | reconnecting | disconnected`)
+- `frontend/lib/types.ts` — updated: `PriceUpdate` uses `previous_price` matching `to_dict()`; `WatchlistEntry` matches `/api/watchlist` response shape
+- `frontend/lib/api.ts` — typed fetch wrappers for all endpoints
+- `frontend/lib/useSSE.ts` — `EventSource` hook; parses batch `{ticker: PriceUpdate}` SSE events; maintains `Map<ticker, PriceUpdate>` and sparkline history `Map<ticker, number[]>` (last 60 pts); exposes `connected | reconnecting | disconnected` status
 - `frontend/components/Header.tsx` — brand "FinAlly" (accent yellow), live total portfolio value, cash balance, connection status dot (green/yellow/red)
 - `frontend/components/Sparkline.tsx` — small SVG line chart from `number[]`
 - `frontend/components/WatchlistPanel.tsx` — ticker grid with price flash animation (CSS class applied for ~500ms on price change), sparkline per row, click to select ticker
@@ -667,20 +666,18 @@ Each numbered task below maps to the agent task list in `finally-team`. Tasks ar
 
 Resume in this priority order:
 
-1. **frontend-engineer**: Task #7 — `useSSE.ts` hook, Header, WatchlistPanel, Sparkline components (lib/types.ts and lib/api.ts already done)
-2. **llm-engineer**: Task #6 — `POST /api/chat` with OpenAI structured outputs + LLM mock mode (unblocked)
-3. **devops-engineer**: Task #10 — Dockerfile + docker-compose.yml (unblocked; static files copy to `/app/backend/static/` per `main.py` path resolution)
-4. **frontend-engineer**: Task #8 — PortfolioHeatmap, PnLChart, PositionsTable, TradeBar, MainChart (blocked by #7)
-5. **frontend-engineer**: Task #9 — ChatPanel (blocked by #8 and #6)
-6. **integration-tester**: Task #11 — Playwright E2E tests (blocked by #9 and #10)
+1. **llm-engineer**: Task #6 — `POST /api/chat` with OpenAI structured outputs + LLM mock mode (unblocked)
+2. **devops-engineer**: Task #10 — Dockerfile + docker-compose.yml (unblocked; static files copy to `/app/backend/static/` per `main.py` path resolution)
+3. **frontend-engineer**: Task #8 — PortfolioHeatmap, PnLChart, PositionsTable, TradeBar, MainChart (unblocked — Task #7 done)
+4. **frontend-engineer**: Task #9 — ChatPanel (blocked by #8 and #6)
+5. **integration-tester**: Task #11 — Playwright E2E tests (blocked by #9 and #10)
 
 ### Resume Instructions
 
-Tasks #3 and #5 are complete. Tasks #6, #7, and #10 are unblocked and ready to start.
+Tasks #3, #5, and #7 are complete. Tasks #6, #8, and #10 are unblocked and ready to start.
 
 - Task #6 (ready) → llm-engineer
-- Task #7 (ready) → frontend-engineer
-- Task #8 (blocked by #7) → frontend-engineer
+- Task #8 (ready) → frontend-engineer
 - Task #9 (blocked by #8 and #6) → frontend-engineer
 - Task #10 (ready) → devops-engineer
 - Task #11 (blocked by #9 and #10) → integration-tester
